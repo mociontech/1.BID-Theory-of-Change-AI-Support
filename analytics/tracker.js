@@ -22,7 +22,12 @@
         if (!req.result.objectStoreNames.contains(name)) req.result.createObjectStore(name, { keyPath: 'id' });
       }
     };
-    req.onsuccess = () => { database = req.result; status.local = 'ready'; resolve(); };
+    req.onsuccess = () => {
+      database = req.result; status.local = 'ready'; resolve();
+      // A newer tracker in another tab needs to upgrade the database: release it instead of blocking that tab.
+      database.onversionchange = () => { database.close(); status.local = 'closed'; failed('Base local cerrada: hay una versión más nueva del tótem en otra pestaña. Recarga esta página.'); };
+    };
+    req.onblocked = () => { status.local = 'blocked'; failed('Base local bloqueada por otra pestaña del tótem con una versión anterior. Cierra las demás pestañas del sitio y recarga.'); };
     req.onerror = () => reject(req.error);
   });
   function failed(error) {
