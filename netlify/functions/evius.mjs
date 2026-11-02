@@ -103,5 +103,3 @@ export default async (request) => {
   }
   return json(200, { ok: errors.length === 0, mode: 'live', sent, rejected, errors, error: errors[0] });
 };
-
-export const config = { path: '/.netlify/functions/evius' };
