@@ -135,7 +135,9 @@
         return;
       }
       status.evius = 'sending';
+      // A hung request must never freeze the queue: give up after 30 s and retry later.
       const response = await fetch(evius.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(30000),
         body: JSON.stringify({ projectId, records: due.map(({ attempts, nextAt, ...record }) => record) }) });
       const isJson = (response.headers.get('content-type') || '').includes('json');
       const body = isJson ? await response.json().catch(() => null) : null;
