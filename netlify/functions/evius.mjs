@@ -67,7 +67,7 @@ export default async (request) => {
   if (request.method !== 'POST') return json(405, { ok: false, error: 'Solo POST' });
   const env = process.env;
   const cfg = { url: (env.EVIUS_URL || '').replace(/\/+$/, ''), token: env.EVIUS_TOKEN || '', eventId: env.EVIUS_EVENT_ID || '',
-    source: env.EVIUS_SOURCE || 'BID VIDEOS', mode: (env.EVIUS_MODE || 'off').toLowerCase(),
+    source: env.EVIUS_SOURCE || '', mode: (env.EVIUS_MODE || 'off').toLowerCase(),
     score: Number.isFinite(Number(env.EVIUS_SCORE_PER_PRESS)) ? Number(env.EVIUS_SCORE_PER_PRESS) : 100 };
   let body;
   try { body = await request.json(); } catch { return json(400, { ok: false, error: 'JSON invalido' }); }
@@ -79,7 +79,7 @@ export default async (request) => {
   }
   if (!valid.length) return json(400, { ok: false, error: 'Sin registros validos', sent: [], rejected });
   if (cfg.mode !== 'live') return json(200, { ok: true, mode: cfg.mode, skipped: true, sent: valid.map(r => r.id), rejected, errors: [] });
-  if (!cfg.url || !cfg.token || !cfg.eventId) return json(500, { ok: false, error: 'Faltan EVIUS_URL, EVIUS_TOKEN o EVIUS_EVENT_ID en el servidor' });
+  if (!cfg.url || !cfg.token || !cfg.eventId || !cfg.source) return json(500, { ok: false, error: 'Faltan EVIUS_URL, EVIUS_TOKEN, EVIUS_EVENT_ID o EVIUS_SOURCE en el servidor' });
 
   const sentAt = new Date().toISOString();
   const base = { eventId: cfg.eventId, source: cfg.source, sentAt };
